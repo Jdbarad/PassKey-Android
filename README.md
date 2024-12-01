@@ -6,5 +6,13 @@ Create a passkey: The demo allows users to create a new passkey for the applicat
 Sign in with a passkey: Users can sign in to the application using an existing passkey stored on their device.
 Manage passkeys: The demo provides an interface for viewing and managing passkeys stored on the device.
 
-Medium Article: https://jdbarad.medium.com/quick-sign-in-with-passkey-on-android-919adff47d54
-Youtube Demo Video: https://youtu.be/3pmJGPUrGcI?si=LNUTcNO8JeoRJqde
+
+- <a href="https://jdbarad.medium.com/quick-sign-in-with-passkey-on-android-919adff47d54">Medium Article</a>
+- <a href="https://youtu.be/3pmJGPUrGcI?si=LNUTcNO8JeoRJqde">YouTube Demo Video</a>
+
+
+## Developed By
+### [Jaypalsinh Barad](https://jdbarad.github.io/)
+- <a href="mailto:jdbarad1010@gmail.com">Mail</a>
+- <a href="https://www.linkedin.com/in/jdbarad">LinkedIn</a>
+- <a href="https://twitter.com/jdbarad1010">Tweeter</a>
