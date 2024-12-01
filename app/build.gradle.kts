@@ -68,7 +68,7 @@ dependencies {
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.androidx.credentials)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play)
 
 }

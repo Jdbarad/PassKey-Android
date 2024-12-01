@@ -21,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +59,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        credentialManager = CredentialManager.create(this)
+        credentialManager = CredentialManager.create(context = this)
 
         setContent {
             PassKeyDemoTheme {
@@ -90,6 +91,11 @@ class MainActivity : ComponentActivity() {
         val isLogInProgress = rememberSaveable { mutableStateOf(false) }
 
         resultMessage = rememberSaveable { mutableStateOf("") }
+
+        LaunchedEffect(resultMessage.value) {
+            delay(3000)
+            resultMessage.value = ""
+        }
 
         if (isLogInProgress.value || isSignInWithPasswordProgress.value || isSignInWithPassKeyProgress.value) {
             resultMessage.value = ""
@@ -139,6 +145,10 @@ class MainActivity : ComponentActivity() {
                                 shape = RoundedCornerShape(8.dp),
                                 onClick = {
                                     lifecycleScope.launch {
+                                        if (usernameSignIn.isEmpty()) {
+                                            resultMessage.value = "Username cannot be empty"
+                                            return@launch
+                                        }
                                         createPassKey(usernameSignIn, isSignInWithPassKeyProgress)
                                     }
                                 }) {
@@ -161,6 +171,19 @@ class MainActivity : ComponentActivity() {
                                 isLoginFocus = false
                             } else {
                                 lifecycleScope.launch {
+                                    if (usernameSignIn.isEmpty() && passwordSignIn.isEmpty()) {
+                                        resultMessage.value =
+                                            "Username and Password cannot be empty"
+                                        return@launch
+                                    }
+                                    if (usernameSignIn.isEmpty()) {
+                                        resultMessage.value = "Username cannot be empty"
+                                        return@launch
+                                    }
+                                    if (passwordSignIn.isEmpty()) {
+                                        resultMessage.value = "Password cannot be empty"
+                                        return@launch
+                                    }
                                     signInPassword(
                                         usernameSignIn,
                                         passwordSignIn,
@@ -223,7 +246,7 @@ class MainActivity : ComponentActivity() {
                         onClick = {
                             if (isLoginFocus)
                                 lifecycleScope.launch {
-                                    signInPassKey(isLogInProgress,usernameLogIn,passwordLogIn)
+                                    signInPassKey(isLogInProgress, usernameLogIn, passwordLogIn)
                                 }
                             else
                                 isLoginFocus = true
@@ -244,13 +267,10 @@ class MainActivity : ComponentActivity() {
                     Column(
                         Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)) {
+                            .padding(16.dp)
+                    ) {
                         Text(text = "Result", fontWeight = FontWeight.Bold)
                         Text(text = resultMessage.value)
-                    }
-                    lifecycleScope.launch {
-                        delay(10000)
-                        resultMessage.value = ""
                     }
                 }
             }
@@ -265,8 +285,8 @@ class MainActivity : ComponentActivity() {
         signInWithPasswordProgress.value = true
         try {
             val response = credentialManager.createCredential(
-                this,
-                CreatePasswordRequest(username, password)
+                context = this,
+                request = CreatePasswordRequest(id = username, password = password)
             )
             resultMessage.value = response.data.toString()
             Log.d("MainActivity", "response: $response")
@@ -283,8 +303,8 @@ class MainActivity : ComponentActivity() {
         val request = CreatePublicKeyCredentialRequest(getRegistrationRequest(username))
         try {
             val response = credentialManager.createCredential(
-                this,
-                request
+                context = this,
+                request = request
             ) as CreatePublicKeyCredentialResponse
             resultMessage.value = response.registrationResponseJson
             isSignInProgress.value = false
@@ -301,18 +321,21 @@ class MainActivity : ComponentActivity() {
         passwordLogIn: MutableState<String>
     ) {
         isLogInProgress.value = true
-        val request = assets.open("loginRequest.json").bufferedReader().use { it.readText() }
+
         try {
             val response = credentialManager.getCredential(
-                this,
-                GetCredentialRequest(
+                context = this,
+                request = GetCredentialRequest(
                     listOf(
-                        GetPublicKeyCredentialOption(request),
+                        GetPublicKeyCredentialOption(getLoginRequest()),
                         GetPasswordOption()
                     )
                 )
             )
-            Log.d("MainActivity", "signInPassKey: ${handleLoginResponse(response,usernameLogIn,passwordLogIn)}")
+            Log.d(
+                "MainActivity",
+                "signInPassKey: ${handleLoginResponse(response, usernameLogIn, passwordLogIn)}"
+            )
             isLogInProgress.value = false
         } catch (e: Exception) {
             e.printStackTrace()
@@ -330,8 +353,7 @@ class MainActivity : ComponentActivity() {
             val cred = response.credential as PublicKeyCredential
             resultMessage.value = cred.authenticationResponseJson
             return "Passkey: ${cred.authenticationResponseJson}"
-        }
-        if (response.credential is PasswordCredential) {
+        } else if (response.credential is PasswordCredential) {
             val cred = response.credential as PasswordCredential
             usernameLogIn.value = cred.id
             passwordLogIn.value = cred.password
@@ -348,6 +370,14 @@ class MainActivity : ComponentActivity() {
             .replace("<userName>", username.lowercase())
             .replace("<userDisplayName>", username)
             .replace("<challenge>", getEncodedChallenge())
+            .replace("<relyingPartyId>", "confab.glitch.me")
+    }
+
+    private fun getLoginRequest(): String {
+        return assets.open("loginRequest.json")
+            .bufferedReader().use { it.readText() }
+            .replace("<challenge>", getEncodedChallenge())
+            .replace("<relyingPartyId>", "confab.glitch.me")
     }
 
     private fun getEncodedUserId(username: String): String {
