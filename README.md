@@ -9,10 +9,3 @@ Manage passkeys: The demo provides an interface for viewing and managing passkey
 
 - <a href="https://jdbarad.medium.com/quick-sign-in-with-passkey-on-android-919adff47d54">Medium Article</a>
 - <a href="https://youtu.be/3pmJGPUrGcI?si=LNUTcNO8JeoRJqde">YouTube Demo Video</a>
-
-
-## Developed By
-### [Jaypalsinh Barad](https://jdbarad.github.io/)
-- <a href="mailto:jdbarad1010@gmail.com">Mail</a>
-- <a href="https://www.linkedin.com/in/jdbarad">LinkedIn</a>
-- <a href="https://twitter.com/jdbarad1010">Tweeter</a>
